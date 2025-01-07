@@ -87,6 +87,7 @@ def main():
                     #finally we write on the frame near the centroids the width and height of the object
                     text = f"Width:{width:.1f}, Height:{height:.1f}"
                     cv2.putText(frame, text, (centroid[0], centroid[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                    
 
 
         # Show the frame
