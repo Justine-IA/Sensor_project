@@ -31,9 +31,10 @@ def main():
 
         # we are using the canny contours function defined in mydetectionmethods.py files
         # to find the contours of object in the frame 
-        canny_contours = MyDetectionMethods.canny_filter(frame)
+        edges, canny_contours = MyDetectionMethods.canny_filter(frame)
         cv2.drawContours(frame, canny_contours, -1, (0, 0, 255), 2) #if we want to write the contours on the frame
 
+        cv2.imshow("Canny Filter", edges)
 
         # Detect ArUco markers in the frame using the detector we build earlier to have corners and ids
         corners, ids, rejected = detector.detectMarkers(frame)
@@ -77,8 +78,7 @@ def main():
                 height = round(rect[1][1] * pixel_to_cm_ratio, 1)
 
                 #we create a filter to filter out too small or too big object as we want 
-                #min the battery and max the aruco square
-                if width > 1 and height > 1 and width<4 and height <4:
+                if width >= 0.3 and height >= 50 and width<=30 and height <=30:
                     #we draw the circle representig the center of the rectangle in the frame
                     cv2.circle(frame, centroid, radius=2, color=(0, 0, 255), thickness=-1)
                     #same but with the rectangle of the object
