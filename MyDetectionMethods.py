@@ -12,8 +12,23 @@ class MyDetectionMethods:
 
         gray = cv2.cvtColor(image_data, cv2.COLOR_BGR2GRAY)
 
+
+
+
+
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)  # Enhanced grayscale image
+
+        # Step 2: Optionally, apply Adaptive Thresholding for shadow reduction
+        adaptive_thresh = cv2.adaptiveThreshold(
+            enhanced, 255, 
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  # Use Gaussian-weighted mean for local thresholding
+            cv2.THRESH_BINARY_INV,  # Inverted binary threshold
+            11, 2  # Block size and constant to subtract
+        )
+
         # Apply Gaussian Blur to reduce noise
-        blurred = cv2.GaussianBlur(gray, (3, 3), 1.4)
+        blurred = cv2.GaussianBlur(adaptive_thresh, (3, 3), 1.4)
 
         thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
@@ -22,12 +37,14 @@ class MyDetectionMethods:
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         for c in cnts:
             area = cv2.contourArea(c)
-            if area < 5500:
+            if area < 100:
                 cv2.drawContours(thresh, [c], -1, (0,0,0), -1)
 
         # Morph close and invert image
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
         edges = 255 - cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+        
 
 
 
