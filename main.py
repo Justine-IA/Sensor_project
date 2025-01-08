@@ -2,7 +2,12 @@ import cv2
 import cv2.aruco as aruco
 from MyDetectionMethods import MyDetectionMethods
 import numpy as np
+import time
+
+
 def main():
+    last_update_time = time.time()
+    update_interval = 1  # 1 second
     
     # Open the default camera
     cap = cv2.VideoCapture(0)
@@ -13,7 +18,7 @@ def main():
 
     # Define ArUco dictionary and parameters
     #this lines define the type of aruco that we are using and want to detect
-    aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_100)
+    aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_250)
     #configure algorithm  to detect aruco markers in images
     parameters = aruco.DetectorParameters()
     #create the detector using the parameters and the dictionnary we defined before
@@ -37,7 +42,9 @@ def main():
         cv2.imshow("Canny Filter", edges)
 
         # Detect ArUco markers in the frame using the detector we build earlier to have corners and ids
-        corners, ids, rejected = detector.detectMarkers(frame)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        corners, ids, rejected = detector.detectMarkers(gray)
 
         if ids is not None:
             # Draw bounding boxes around detected markers if ids is present (the ID of the aruco )
@@ -55,9 +62,11 @@ def main():
             # We take the size in px of the distance between the two top corners
             aruco_size = abs(top_left_corner[0] - top_right_corner[0] )
             print("aruco size", aruco_size)
+
             #we calcul the ratio pixel to centimeter because 
             # we know that between the two corners there is 2cm 
-            pixel_to_cm_ratio = 2/aruco_size
+            
+            pixel_to_cm_ratio = 1.8/aruco_size
 
             #we check if we have contours with the canny detector used
             for contour in canny_contours:
@@ -65,6 +74,9 @@ def main():
                 #we use the function minAreaRect which find automatically the minimum area
                 #that can enclose a contour
                 rect = cv2.minAreaRect(contour)
+
+
+
                 #we convert rect to the four corner points of the rectangle under the box variable to then draw it later on the frame
                 box = cv2.boxPoints(rect)  
                 #we convert float into integers 
@@ -74,20 +86,25 @@ def main():
                 centroid = (int(rect[0][0]), int(rect[0][1]))
                 #same with with and height but it is in rect[1] 
                 #and we use pixel to cm ratio to have it in cm and round it
-                width = round(rect[1][0] * pixel_to_cm_ratio, 1)
-                height = round(rect[1][1] * pixel_to_cm_ratio, 1)
+                width = round(rect[1][0] * pixel_to_cm_ratio, 2)
+                height = round(rect[1][1] * pixel_to_cm_ratio, 2)
 
                 #we create a filter to filter out too small or too big object as we want 
-                if width >= 0.3 and height >= 5 and width<=30 and height <=30:
-                    #we draw the circle representig the center of the rectangle in the frame
+                # if width>height:
+                #     test= width
+                #     width = height
+                #     height = test
+
+                if width >= 0.3 and height >= 0.3 and width <= 40 and height <= 40:
+                    # Draw the circle representing the center of the rectangle in the frame
                     cv2.circle(frame, centroid, radius=2, color=(0, 0, 255), thickness=-1)
-                    #same but with the rectangle of the object
+
+                    # Draw the rectangle of the object
                     cv2.drawContours(frame, [box], 0, (255, 0, 0), 2)
 
-                    #finally we write on the frame near the centroids the width and height of the object
+                    # Write the size near the centroid
                     text = f"Width:{width:.1f}, Height:{height:.1f}"
                     cv2.putText(frame, text, (centroid[0], centroid[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
-                    
 
 
         # Show the frame
