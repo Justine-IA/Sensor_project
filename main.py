@@ -78,7 +78,7 @@ def main():
                 height = round(rect[1][1] * pixel_to_cm_ratio, 1)
 
                 #we create a filter to filter out too small or too big object as we want 
-                if width >= 0.3 and height >= 50 and width<=30 and height <=30:
+                if width >= 0.3 and height >= 5 and width<=30 and height <=30:
                     #we draw the circle representig the center of the rectangle in the frame
                     cv2.circle(frame, centroid, radius=2, color=(0, 0, 255), thickness=-1)
                     #same but with the rectangle of the object
