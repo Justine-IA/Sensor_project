@@ -138,7 +138,7 @@ class ColorDetector:
         max_color = max(color_percentages.items(), key=lambda x: x[1])
         if max_color[1] > 15:  # Seuil de 15%
             return max_color[0]
-        return "indéterminé"
+        return "color"
 
          
     def process_detections(self, frame, shape_contours, head_contours, pixel_to_cm_ratio, centroid):#self, frame, contours, pixel_to_cm_ratio):
