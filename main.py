@@ -1,10 +1,11 @@
 import cv2
 import cv2.aruco as aruco
-from MyDetectionMethods import MyDetectionMethods
+from MyDetectionMethods import MyDetectionMethods, ColorDetector
 import numpy as np
 import math
 
-def recognition_needle(width, height, contour, box, frame, rect ,centroid):
+def recognition_needle(width, height, contour, box, frame, rect ,centroid, color):
+
                 if width> height:
                     stock = width
                     width = height
@@ -23,7 +24,7 @@ def recognition_needle(width, height, contour, box, frame, rect ,centroid):
 
 
                     # Display the angle and classification near the bottom-left corner
-                    text = f"Large" #, Angle:{angle}°
+                    text = f"Large, {color}" #, Angle:{angle}°
                     cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
 
@@ -37,35 +38,35 @@ def recognition_needle(width, height, contour, box, frame, rect ,centroid):
                     text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
                     angle = round(rect[2], 2) 
 
-                    text = f"small" #, Angle:{angle}°
+                    text = f"small, {color}" #, Angle:{angle}°
                     cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
 
-                elif width>1.5 and height > 2 and width <=4 and height <=4:
-                    if width > 1.9 and height>1.9 and width<2.2 and height<2.2:
-                        bottom_left_corner = tuple(box[3])  
-                        text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
+                # elif width>1.5 and height > 2 and width <=4 and height <=4:
+                #     if width > 1.9 and height>1.9 and width<2.2 and height<2.2:
+                #         bottom_left_corner = tuple(box[3])  
+                #         text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
 
 
-                        text = f"Aruco Marker" # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
-                        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                #         text = f"Aruco Marker" # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
+                #         cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
                         
                     
 
-                    else:
-                        cv2.drawContours(frame, [box], 0, (0, 255, 255), 2)
+                #     else:
+                #         cv2.drawContours(frame, [box], 0, (0, 255, 255), 2)
 
-                        cv2.drawContours(frame, [contour], 0, (0, 255, 0), 2)
+                #         cv2.drawContours(frame, [contour], 0, (0, 255, 0), 2)
 
-                        bottom_left_corner = tuple(box[3])  
+                #         bottom_left_corner = tuple(box[3])  
 
-                        # Offset the text slightly above the bottom-left corner to avoid overlap
-                        text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
-                        angle = round(rect[2], 1) 
+                #         # Offset the text slightly above the bottom-left corner to avoid overlap
+                #         text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
+                #         angle = round(rect[2], 1) 
 
 
-                        text = f"Multiple needle superposed,  Width:{width:.1f}, Height:{height:.1f}  Angle:{angle}° " # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
-                        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                #         text = f"Multiple needle superposed,  Width:{width:.1f}, Height:{height:.1f}  Angle:{angle}° " # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
+                #         cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
 
                 # elif width>0.2 and height >0.7 and width<1.3 and height <2 :
@@ -91,6 +92,7 @@ def recognition_needle(width, height, contour, box, frame, rect ,centroid):
 
 
 def main():
+    color_detector = ColorDetector()
 
     
     # Open the default camera
@@ -117,6 +119,7 @@ def main():
 
         edges, canny_contours = MyDetectionMethods.canny_filter(frame)
         # cv2.drawContours(frame, canny_contours, -1, (0, 0, 255), 2) 
+        head_edges, head_contours = MyDetectionMethods.head_detection(frame)
 
         cv2.imshow("Canny Filter", edges)
 
@@ -154,14 +157,16 @@ def main():
 
 
                 centroid = (int(rect[0][0]), int(rect[0][1]))
+
   
 
                 width = round(rect[1][0] * pixel_to_cm_ratio, 2)
                 height = round(rect[1][1] * pixel_to_cm_ratio, 2)
 
                 #we create a filter to filter out too small or too big object as we want 
+                color = color_detector.process_detections(frame, canny_contours, head_contours, pixel_to_cm_ratio, centroid)
 
-                recognition_needle(width, height, contour, box, frame, rect ,centroid)
+                recognition_needle(width, height, contour, box, frame, rect ,centroid, color)
 
 
 
