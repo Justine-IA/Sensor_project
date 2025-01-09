@@ -90,23 +90,23 @@ class ColorDetector:
     def __init__(self):
         # Définition des plages de couleurs en HSV
         self.color_ranges = {
-            'rouge': [
+            'red': [
                 {'lower': np.array([0, 100, 100]), 'upper': np.array([10, 255, 255])},
                 {'lower': np.array([160, 100, 100]), 'upper': np.array([180, 255, 255])}
             ],
-            'bleu': [
+            'blue': [
                 {'lower': np.array([100, 100, 100]), 'upper': np.array([130, 255, 255])}
             ],
-            'vert': [
+            'green': [
                 {'lower': np.array([40, 100, 100]), 'upper': np.array([80, 255, 255])}
             ],
-            'jaune': [
+            'yellow': [
                 {'lower': np.array([20, 100, 100]), 'upper': np.array([35, 255, 255])}
             ],
-            'noir': [
+            'black': [
                 {'lower': np.array([0, 0, 0]), 'upper': np.array([180, 255, 30])}
             ],
-            'blanc': [
+            'white': [
                 {'lower': np.array([0, 0, 200]), 'upper': np.array([180, 30, 255])}
             ]
         }
