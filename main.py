@@ -42,40 +42,50 @@ def recognition_needle(width, height, contour, box, frame, rect ,centroid):
 
 
                 elif width>1.5 and height > 2 and width <=4 and height <=4:
-
-                    cv2.drawContours(frame, [box], 0, (0, 255, 255), 2)
-
-                    cv2.drawContours(frame, [contour], 0, (0, 255, 0), 2)
-
-                    bottom_left_corner = tuple(box[3])  
-
-                    # Offset the text slightly above the bottom-left corner to avoid overlap
-                    text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
-                    angle = round(rect[2], 1) 
+                    if width > 1.9 and height>1.9 and width<2.2 and height<2.2:
+                        bottom_left_corner = tuple(box[3])  
+                        text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
 
 
-                    text = f"Multiple needle superposed  Angle:{angle}° " # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
-                    cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                        text = f"Aruco Marker" # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
+                        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                        
+                    
+
+                    else:
+                        cv2.drawContours(frame, [box], 0, (0, 255, 255), 2)
+
+                        cv2.drawContours(frame, [contour], 0, (0, 255, 0), 2)
+
+                        bottom_left_corner = tuple(box[3])  
+
+                        # Offset the text slightly above the bottom-left corner to avoid overlap
+                        text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
+                        angle = round(rect[2], 1) 
 
 
-                elif width>0.2 and height >0.7 and width<1.3 and height <2 :
-                    # Draw the circle representing the center of the rectangle in the frame
-                    cv2.circle(frame, centroid, radius=2, color=(0, 0, 255), thickness=4)
-                    cv2.drawContours(frame, [box], 0, (255, 0, 255), 2)
+                        text = f"Multiple needle superposed,  Width:{width:.1f}, Height:{height:.1f}  Angle:{angle}° " # , Angle:{angle} Width:{width:.1f}, Height:{height:.1f},
+                        cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
-                    cv2.drawContours(frame, [contour], 0, (255, 0, 255), 2)
 
-                    bottom_left_corner = tuple(box[3])  
+                # elif width>0.2 and height >0.7 and width<1.3 and height <2 :
+                #     # Draw the circle representing the center of the rectangle in the frame
+                #     cv2.circle(frame, centroid, radius=2, color=(0, 0, 255), thickness=4)
+                #     cv2.drawContours(frame, [box], 0, (255, 0, 255), 2)
 
-                    # Offset the text slightly above the bottom-left corner to avoid overlap
-                    text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
-                    angle = round(rect[2], 1) 
+                #     cv2.drawContours(frame, [contour], 0, (255, 0, 255), 2)
 
-                    # Draw the rectangle of the object
+                #     bottom_left_corner = tuple(box[3])  
 
-                    # Write the size near the centroid
-                    text = f"BROKER NEEDLE"
-                    cv2.putText(frame, text, (centroid[0], centroid[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                #     # Offset the text slightly above the bottom-left corner to avoid overlap
+                #     text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
+                #     angle = round(rect[2], 1) 
+
+                #     # Draw the rectangle of the object
+
+                #     # Write the size near the centroid
+                #     text = f"BROKER NEEDLE"
+                #     cv2.putText(frame, text, (centroid[0], centroid[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
 
 
