@@ -29,13 +29,12 @@ class MyDetectionMethods:
         )
 
 
-        edges = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
-        # edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-        # edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        # edges = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
+
 
 
         # Find contours
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(adaptive_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return edges, contours
 
