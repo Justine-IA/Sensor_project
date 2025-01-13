@@ -88,7 +88,7 @@ class MyDetectionMethods:
 
 class ColorDetector:
     def __init__(self):
-        # Définition des plages de couleurs en HSV
+        # HSV color range definitions
         self.color_ranges = {
             'red': [
                 {'lower': np.array([0, 100, 100]), 'upper': np.array([10, 255, 255])},
@@ -113,18 +113,18 @@ class ColorDetector:
 
     def detect_color(self, roi):
         """
-        Détecte la couleur dominante dans une région d'intérêt (ROI)
+        Detect the most dominant color out of the ROI  
         """
-        # Conversion en HSV
+        # Convertion from BGR to HSV
         hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
         
-        # Calculer le pourcentage de pixels pour chaque couleur
+        # Calculating the pourcentage of pixel for each range of color using a mask 
         color_percentages = {}
         
         for color_name, ranges in self.color_ranges.items():
             mask = np.zeros(hsv_roi.shape[:2], dtype=np.uint8)
             
-            # Pour gérer les couleurs avec plusieurs plages (comme le rouge)
+            # Range has 2 ranges because it's a circular spectrum, it begins and ends with red, so we need to apply the mask for each range
             for range_dict in ranges:
                 current_mask = cv2.inRange(hsv_roi, range_dict['lower'], range_dict['upper'])
                 mask = cv2.bitwise_or(mask, current_mask)
@@ -134,79 +134,47 @@ class ColorDetector:
             percentage = (color_pixels / total_pixels) * 100
             color_percentages[color_name] = percentage
         
-        # Retourner la couleur avec le plus haut pourcentage si elle dépasse un seuil
+        # Return the color with the highest pourcentage if it's above the threshold
         max_color = max(color_percentages.items(), key=lambda x: x[1])
         if max_color[1] > 15:  # Seuil de 15%
             return max_color[0]
         return "color"
 
          
-    def process_detections(self, frame, shape_contours, head_contours, pixel_to_cm_ratio, centroid):#self, frame, contours, pixel_to_cm_ratio):
-        """
-        Traite les détections en utilisant les contours de forme et de couleur séparément
-        """
+    def process_detections(self, frame, head_contours, centroid):#self, frame, contours, pixel_to_cm_ratio):
         self.detections = []
         total_objects = {'Large': 0, 'Small': 0, 'Multiple': 0, 'Broken': 0}
         colors_found = set()
 
-        # Créer un dictionnaire pour stocker les couleurs détectées par position
         color_positions = {}
-        
-        # D'abord, analyser les contours des têtes pour la couleur
+
         for contour in head_contours:
-            # Obtenir le centre du contour de la tête
+            # cv2.moments() return the center of the contours
             M = cv2.moments(contour)
             if M["m00"] != 0:
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
                 
-                # Extraire la ROI autour de ce contour
+                # Extract the ROI aounrd the contour
                 x, y, w, h = cv2.boundingRect(contour)
                 head_roi = frame[y:y+h, x:x+w]
                 
                 if head_roi is not None and head_roi.size > 0:
                     color = self.detect_color(head_roi)
-                    if color != "indéterminé":
-                        # Stocker la couleur avec sa position
+                    if color != "indetermined":
+                        # Storing the color and its position
                         color_positions[(cx, cy)] = color
                         colors_found.add(color)
 
 
 
-            # Trouver la couleur la plus proche de ce contour
-            color = "indéterminé"
+            # Find the nearest color to the centroid from the positions returned calculating the euclidian distance
+            color = "indetermined"
             min_distance = float('inf')
             for (cx, cy), col in color_positions.items():
                 dist = ((centroid[0] - cx) ** 2 + (centroid[1] - cy) ** 2) ** 0.5
-                if dist < min_distance and dist < 50:  # Seuil de distance de 50 pixels
+                if dist < min_distance and dist < 50:  # the distance threshold is 50 pixels
                     min_distance = dist
                     color = col
 
-            
-
         return color
-        
-    
-    def draw_detections(self, frame):
-        """
-        Dessine toutes les détections sur l'image
-        """
-        # Dessiner les contours et les informations pour chaque détection
-        for det in self.detections:
-            cv2.drawContours(frame, [det['contour']], 0, det['color_contour'], 2)
-            
-            # Ajouter le texte avec la catégorie et la couleur
-            bottom_left_corner = tuple(det['box'][3])
-            text_position = (bottom_left_corner[0], bottom_left_corner[1] + 20)
-            text = f"{det['category']}"
-            if det['color'] != "indéterminé":
-                text += f" - {det['color']}"
-            cv2.putText(frame, text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
-
-        # Ajouter un récapitulatif en haut de l'image
-        y_pos = 30
-        cv2.putText(frame, "Detected objects:", (10, y_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-        for det in self.detections:
-            y_pos += 20
-            summary = f"{det['category']} ({det['color']})"
-            cv2.putText(frame, summary, (10, y_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)

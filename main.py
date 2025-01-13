@@ -163,7 +163,7 @@ def main():
                 height = round(rect[1][1] * pixel_to_cm_ratio, 2)
 
                 #we create a filter to filter out too small or too big object as we want 
-                color = color_detector.process_detections(frame, canny_contours, head_contours, pixel_to_cm_ratio, centroid)
+                color = color_detector.process_detections(frame, head_contours, centroid)
 
                 recognition_needle(width, height, contour, box, frame, rect ,centroid, color)
 
